@@ -1,3 +1,10 @@
+**v2025.5.18-guard (202611012)**
+- Fix `batt_status_override` being ignored: `not_charging` shadowed the `chargingSwitch` array with a string, so `status()` read `[0]` as the whole spec and `[2]` as empty
+- Add the capacity guard (`capacity_guard=auto|off|HI-LO`, LO < HI): while held idle, if capacity reaches HI, cut the charger input with a verified discharging switch until it falls to LO; a detached timer that holds no copy of accd's lock undoes a drain whose daemon was killed
+- Guard state is written to `/dev/.vr25/acc/.state` (CHARGE, Idle, Discharging, DRAIN) and events to `acc-data/logs/guard.log`
+- Add `tests/guard-test.sh`, `tools/deploy.sh` and `docs/capacity-guard.md`
+- `module.prop` still points `updateJson` and `acc -u` at upstream; do not run `acc -u` on a device running this build
+
 **v2025.5.18-dev (202505180)**
 - acc -f fixes & enhancements
 - acca -t q ... (quiet test; reports Ok, Idle or Fail)
