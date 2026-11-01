@@ -21,13 +21,14 @@ not_charging() {
   local _STI=${_STI:-35} # switch test iterations
   local switch=${flip-}; flip=
   local curThen=$(cat $curThen)
-  local chargingSwitch="${chargingSwitch[*]-}"
+  local swSpec="${chargingSwitch[*]-}"
   local idleThreshold=${idleThreshold:-10}
   local battStatusOverride="${battStatusOverride-}"
   local battStatusWorkaround=${battStatusWorkaround-}
   local wsLog=$dataDir/logs/working-switches.log
 
-  [[ "$chargingSwitch" = *\ -- ]] && chargingSwitch="${chargingSwitch% --}" || battStatusOverride=
+  # keep the chargingSwitch array intact: status() reads its elements, and a same-named local string hides them
+  [[ "$swSpec" = *\ -- ]] && swSpec="${swSpec% --}" || battStatusOverride=
 
   case "$currFile" in
     */current_now|*/?attery?verage?urrent) [ ${ampFactor:-$ampFactor_} -eq 1000 ] || idleThreshold=${idleThreshold}000;;
@@ -38,15 +39,15 @@ not_charging() {
     for i in $(seq $_STI); do
       if [ "$switch" = off ]; then
         ! status ${1-} || {
-          sw=$(grep "\[[id]\] $chargingSwitch" $wsLog 2>/dev/null || :)
+          sw=$(grep "\[[id]\] $swSpec" $wsLog 2>/dev/null || :)
           while :; do
             j=$(echo $_status | sed -E 's/^(.).*/\1/; s/I/i/; s/D/d/')
             if [ -n "$sw" ]; then
-              [[ "$sw" = \[$j\]* ]] || { sed -i "\|$chargingSwitch|d" $wsLog; sw=; continue; }
+              [[ "$sw" = \[$j\]* ]] || { sed -i "\|$swSpec|d" $wsLog; sw=; continue; }
             else
-              printf "[$j] $chargingSwitch" >> $wsLog
-              case "$chargingSwitch" in
-                *current*) [[ "$$chargingSwitch" = *current_cmd* ]] || echo " {mcc}";;
+              printf "[$j] $swSpec" >> $wsLog
+              case "$swSpec" in
+                *current*) [[ "$swSpec" = *current_cmd* ]] || echo " {mcc}";;
                 *control_limit_max*|*siop_level*|*temp_level*) echo " {tl}";;
                 *voltage*) echo " {mcv}";;
                 *) echo;;
