@@ -1,9 +1,10 @@
-configVerCode=202505180
+configVerCode=202611010
 
 allowIdleAbovePcap=true
 ampFactor=
 battStatusWorkaround=true
 capacity=(5 101 70 75 false)
+capacityGuard=auto
 cooldownCurrent=
 cooldownRatio=()
 currentWorkaround=false
@@ -44,6 +45,7 @@ runCmdOnPause=''
 # battStatusOverride=Idle|Discharging|'code to PRINT value for _status'
 # battStatusWorkaround=true|false
 # capacity=(shutdown_capacity=% cooldown_capacity=% resume_capacity=% pause_capacity=% capacity_mask=true|false)
+# capacityGuard=auto|off|HI-LO (while held idle, if capacity reaches HI, cut the charger input until it falls to LO; auto: pause_capacity + 2 and - 1)
 # chargingSwitch=([CTRL_FILE1 ON OFF [CTRL_FILE2 ON OFF...] [--]])
 # cooldownCurrent=mA|mA%
 # cooldownRatio=(cooldown_charge=seconds cooldown_pause=seconds)

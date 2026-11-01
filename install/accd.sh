@@ -111,6 +111,7 @@ if ! $_INIT; then
     applyOnPlug=(${applyOnPlug[*]-} ${applyOnBoot[*]-})
     apply_on_plug default
     tempLevel=0
+    drain_restore exit 2>/dev/null || :
     enable_charging
     if [[ "$exitCode" = [127] ]]; then
       . $execDir/logf.sh
@@ -269,8 +270,15 @@ if ! $_INIT; then
 
     while :; do
 
+      if [ "${accState-}" = DRAIN ]; then
+        drain_tick
+        sleep ${loopDelay[0]}
+        continue
+      fi
+
       if is_charging; then
 
+        state_set CHARGE
         xIdle=false
         mtReached=false
 
@@ -342,6 +350,12 @@ if ! $_INIT; then
         sleep ${loopDelay[0]}
 
       else
+
+        state_set ${_status:-HOLD}
+
+        if guard_due && drain_start; then
+          continue
+        fi
 
         if $xIdle && _le_pause_cap; then
           enable_charging
@@ -484,6 +498,7 @@ if ! $_INIT; then
 
   # load generic functions
   . $execDir/misc-functions.sh
+  . $execDir/guard.sh
 
 
   xIdle=false
@@ -525,6 +540,7 @@ if ! $_INIT; then
   currentWorkaround0=$currentWorkaround
 
 
+  drain_restore start
   apply_on_boot
   touch $TMPDIR/.minCapMax
   rm $TMPDIR/.testingsw 2>/dev/null || :
