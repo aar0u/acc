@@ -1,5 +1,15 @@
 # Advanced Charging Controller (ACC)
 
+> **This is a personal fork of [VR-25/acc](https://github.com/VR-25/acc)** (branch `dev`, based on upstream `908a5a4`).
+> It was changed for one device, a rooted Redmi K50 Ultra (diting) that stays plugged in with the battery held at 60-65%.
+> It adds three commits and no other changes:
+>
+> 1. Fix: `not_charging()` shadowed the `chargingSwitch` array with a string, so `batt_status_override=Idle` was never applied.
+> 2. Capacity guard (`capacity_guard=auto|off|HI-LO`, `install/guard.sh`): if the battery is held idle and still climbs to HI, cut the charger input until it falls to LO. See `docs/capacity-guard.md`.
+> 3. `tools/deploy.sh` to back up and install this build over adb, and `tests/guard-test.sh` (22 cases on a fake battery).
+>
+> Verified only on diting (about 3.5 days with no plug/unplug events). Other devices and the upstream installer are untested. Do not run `acc -u` on a device with this build: it pulls upstream's installer.
+
 
 ---
 - [DESCRIPTION](#description)
