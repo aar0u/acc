@@ -38,6 +38,7 @@ apply_on_plug() {
   local file=
   local value=
   local default=
+  local pids=
   local arg=${1:-value}
 
   for entry in ${applyOnPlug[@]-} ${maxChargingVoltage[@]-} \
@@ -50,10 +51,13 @@ apply_on_plug() {
     default=${3:-${2-}}
     set +e
     write \$$arg $file 0 &
+    pids="$pids $!"
     set -e
   done
 
-  wait
+  # not a bare `wait`: accd's force_off loop is also a background job and runs for as long as the level is above
+  # resume_capacity, so waiting for all jobs would freeze the main loop (no guard, no resume) until the level drops
+  [ -z "$pids" ] || wait $pids
 }
 
 

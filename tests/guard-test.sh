@@ -324,6 +324,26 @@ t_never_uses_the_hold_switch_or_current_files() {
   eq "$(cat $T/sys/input_suspend)" 0 "untouched"
 }
 
+t_apply_on_plug_ignores_other_background_jobs() {
+  # force_off is a background loop that outlives apply_on_plug; a bare `wait` made the main loop sleep until the
+  # level fell below resume_capacity (seen on 2026-11-04: no guard for five days)
+  MF=${GUARD%/*}/misc-functions.sh
+  [ -f $MF ] || { echo "    skip: $MF not found"; return 0; }
+  eval "$(sed -n '/^apply_on_plug() {$/,/^}$/p' $MF)"
+  write() { command sleep 0.3 2>/dev/null || command sleep 1; }
+  TMPDIR=$T
+  applyOnPlug=("$T/sys/input_suspend::1::0")
+  maxChargingVoltage=()
+  maxChargingCurrent=()
+  command sleep 20 &
+  bg=$!
+  start=$(command date +%s)   # `date` is the suite's virtual clock
+  apply_on_plug
+  took=$(( $(command date +%s) - start ))
+  kill $bg 2>/dev/null || :
+  [ $took -lt 5 ] || { echo "    FAIL: apply_on_plug waited $took s for an unrelated background job"; exit 1; }
+}
+
 
 # ---- runner ----
 

@@ -1,3 +1,7 @@
+**v2025.5.18-guard (202611013)**
+- Fix the main loop freezing in `apply_on_plug`: it ended with a bare `wait`, which also waits for `force_off`'s background loop, and that loop runs for as long as capacity is above resume_capacity. After a plug event the daemon then did nothing (no guard, no resume) while only `force_off` kept the switch off. `apply_on_plug` now waits only for its own jobs
+- Add a regression test for it in `tests/guard-test.sh`
+
 **v2025.5.18-guard (202611012)**
 - Fix `batt_status_override` being ignored: `not_charging` shadowed the `chargingSwitch` array with a string, so `status()` read `[0]` as the whole spec and `[2]` as empty
 - Add the capacity guard (`capacity_guard=auto|off|HI-LO`, LO < HI): while held idle, if capacity reaches HI, cut the charger input with a verified discharging switch until it falls to LO; a detached timer that holds no copy of accd's lock undoes a drain whose daemon was killed
